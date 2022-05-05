@@ -6,4 +6,8 @@
     <RootNamespace>TestProject__Data_Feed_Service_</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NetMQ" Version="4.0.1.8" />
+  </ItemGroup>
+
 </Project>
