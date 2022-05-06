@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -29,21 +30,35 @@ namespace TestProject__Data_Feed_Service_
                 ZipFile.ExtractToDirectory(zipPath, @"..\..\..\");
                 Console.WriteLine("The \"{0}.zip\" extracted", folderName);
             }
+            Console.WriteLine();
 
             string[] fileEntries = Directory.GetFiles(path + folderName);
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             foreach (string fileName in fileEntries)
             {
-                Console.WriteLine("Begin reading file {0}", getFileName.Match(fileName));
-
                 var strings = ReadCsvFile(fileName).Result;
-                var dictionary = ConvertCsvData(strings);
+                SortedDictionary<DateTime, MarketData> dictionary = ConvertCsvData(strings);
             }
 
+            stopwatch.Stop();
+            Console.WriteLine( $"Elapsed retrieval time: {stopwatch.ElapsedMilliseconds:#,0} milliseconds.\n");
+
+            stopwatch.Restart();
+
+            IEnumerable<Task<string[]>> downloads = fileEntries.Select(ReadCsvFile);
+            IEnumerable <SortedDictionary <DateTime, MarketData>> dictionaries = Task.WhenAll(downloads).Result.AsParallel().Select(ConvertCsvData);
+            var dictionariesArray = dictionaries.ToArray();
+
+            stopwatch.Stop();
+            Console.WriteLine($"Elapsed retrieval time: {stopwatch.ElapsedMilliseconds:#,0} milliseconds.\n");
         }
 
 
         static async Task<string[]> ReadCsvFile(string fileName)
         {
+            Console.WriteLine("Begin reading file {0}", getFileName.Match(fileName));
             using (var reader = File.OpenText(fileName))
             {
                 string[] lines = await File.ReadAllLinesAsync(fileName);
@@ -57,8 +72,9 @@ namespace TestProject__Data_Feed_Service_
                 .OrderBy(x => x.SortKey)
                 .GroupBy(x => x.SortKey)
                 .Select(group => group.First().Line);
-                //.Select(x => x.Line);
+                //.Select(x => x.Line); 
 
+                Console.WriteLine("End reading file   {0}", getFileName.Match(fileName));
                 return sorted.ToArray();
             }
         }
