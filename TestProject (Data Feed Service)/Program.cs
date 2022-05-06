@@ -39,7 +39,7 @@ namespace TestProject__Data_Feed_Service_
             foreach (string fileName in fileEntries)
             {
                 var strings = ReadCsvFile(fileName).Result;
-                SortedDictionary<DateTime, MarketData> dictionary = ConvertCsvData(strings);
+                SortedDictionary<DateTime, List<MarketData>> dictionary = ParseCsvData(strings);
             }
 
             stopwatch.Stop();
@@ -48,7 +48,7 @@ namespace TestProject__Data_Feed_Service_
             stopwatch.Restart();
 
             IEnumerable<Task<string[]>> downloads = fileEntries.Select(ReadCsvFile);
-            IEnumerable <SortedDictionary <DateTime, MarketData>> dictionaries = Task.WhenAll(downloads).Result.AsParallel().Select(ConvertCsvData);
+            IEnumerable <SortedDictionary<DateTime, List<MarketData>>> dictionaries = Task.WhenAll(downloads).Result.AsParallel().Select(ParseCsvData);
             var dictionariesArray = dictionaries.ToArray();
 
             stopwatch.Stop();
@@ -70,22 +70,31 @@ namespace TestProject__Data_Feed_Service_
                     Line = line
                 })
                 .OrderBy(x => x.SortKey)
-                .GroupBy(x => x.SortKey)
-                .Select(group => group.First().Line);
-                //.Select(x => x.Line); 
+                .Select(x => x.Line);
+                //.GroupBy(x => x.SortKey)
+                //.Select(group => group.First().Line);
 
                 Console.WriteLine("End reading file   {0}", getFileName.Match(fileName));
                 return sorted.ToArray();
             }
         }
 
-        static SortedDictionary<DateTime, MarketData> ConvertCsvData(string[] data)
+        static SortedDictionary<DateTime, List<MarketData>> ParseCsvData(string[] data)
         {
-            var dict = new SortedDictionary<DateTime, MarketData>();
+            var dict = new SortedDictionary<DateTime, List<MarketData>>();
             foreach (var item in data)
             {
                 var values = item.Split(',');
-                dict.Add(DateTime.Parse(values[0]), new MarketData(values));
+                var key = DateTime.Parse(values[0]);
+
+                if (dict.ContainsKey(key))
+                {
+                    dict[key].Add(new MarketData(values));
+                }
+                else
+                {
+                    dict.Add(key, new List<MarketData>() { new MarketData(values) });
+                }
             }
 
             return dict;
