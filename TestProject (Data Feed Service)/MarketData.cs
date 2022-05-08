@@ -1,46 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace TestProject__Data_Feed_Service_
+namespace ConsoleAppNetMQ
 {
-	// Timestamp,Last,LastSize,TotalVolume,Bid,Ask,TickId,BasisForLast,TradeMarketCenter,TradeConditions
-	public class MarketData
+    public class MarketData
     {
-		//public DateTime TimeStamp { get; set; }
-		public string Last { get; set; }
-		public string LastSize { get; set; }
-		public string TotalVolume { get; set; }
-		public string Bid { get; set; }
-		public string Ask { get; set; }
-		public string TickId { get; set; }
-		public string BasisForLast { get; set; }
-		public string TradeMarketCenter { get; set; }
-		public string TradeConditions { get; set; }
+        // Ignored some properties so as not to clutter up the console output
+        public string Last { get; set; }
+        [JsonIgnore]
+        public string LastSize { get; set; }
+        [JsonIgnore]
+        public string TotalVolume { get; set; }
+        [JsonIgnore]
+        public string Bid { get; set; }
+        [JsonIgnore]
+        public string Ask { get; set; }
+        [JsonIgnore]
+        public string TickId { get; set; }
+        public string BasisForLast { get; set; }
+        [JsonIgnore]
+        public string TradeMarketCenter { get; set; }
+        [JsonIgnore]
+        public string TradeConditions { get; set; }
+        public string TimeStamp { get; set; }
 
-		public MarketData(string[] data)
+        public MarketData(string[] data)
         {
-			////TimeStamp = DateTime.Parse(data[0]);
-			//Last		      = data[1];
-			//LastSize	      = data[2];
-			//TotalVolume       = data[3];
-			//Bid			      = data[4];
-			//Ask			      = data[5];
-			//TickId			  = data[6];
-			//BasisForLast      = data[7];
-			//TradeMarketCenter = data[8];
-			//TradeConditions   = data[9];
 
-			var dataEnumerator = data.GetEnumerator();
-			dataEnumerator.MoveNext();
-			foreach (var propertyInfo in GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
-			{
-				propertyInfo.SetValue(this, dataEnumerator.Current);
-				dataEnumerator.MoveNext();
-			}
+            //Last		        = data[1];
+            //LastSize	        = data[2];
+            //TotalVolume       = data[3];
+            //Bid			    = data[4];
+            //Ask			    = data[5];
+            //TickId			= data[6];
+            //BasisForLast      = data[7];
+            //TradeMarketCenter = data[8];
+            //TradeConditions   = data[9];
 
-		}
+            var dataEnumerator = data.GetEnumerator();
+            dataEnumerator.MoveNext();
+            foreach (var propertyInfo in GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).SkipLast(1))
+            {
+                propertyInfo.SetValue(this, dataEnumerator.Current);
+                dataEnumerator.MoveNext();
+            }
+        }
 
-	}
+        public override string ToString()
+        {
+            return JsonSerializer.Serialize(this); //.Remove(50);
+        }
+    }
 }
