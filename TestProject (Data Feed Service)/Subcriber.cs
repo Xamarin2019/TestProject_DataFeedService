@@ -15,7 +15,7 @@ namespace ConsoleAppNetMQ
         int number;
         string[] _topics;
         int messageCount = 0;
-        int verticalTextShift = 16;
+        int verticalTextShift = 18;
 
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace ConsoleAppNetMQ
  
                 lock (Program.ConsoleWriterLock)
                 {
-                    Console.SetCursorPosition(0, 3 + number);
+                    Console.SetCursorPosition(0, 5 + number);
                     Console.WriteLine($"Subscriber № {number} connecting..."); 
                 }
 

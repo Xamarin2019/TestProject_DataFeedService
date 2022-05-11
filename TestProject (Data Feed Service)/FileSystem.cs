@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace ConsoleAppNetMQ
 {
@@ -22,19 +23,28 @@ namespace ConsoleAppNetMQ
         public string[] GetFileEntries()
         {
             string folderName = new Regex(@"(\w*)(?=\.zip)").Match(_zipPath).ToString();
+#if DEBUG
             string path = @"..\..\..\";
+#else
+            string path = Directory.GetCurrentDirectory() + "\\";
+#endif
 
-            Console.SetCursorPosition(0, 1);
+            Console.SetCursorPosition(0, 2);
             if (Directory.Exists(path + folderName))
             {
                 Console.WriteLine("The \"{0}\" directory was found.", folderName);
             }
             else
             {
-                ZipFile.ExtractToDirectory(_zipPath, @"..\..\..\");
+                if (!File.Exists(_zipPath))
+                {
+                    Console.WriteLine(Environment.NewLine + "The \"{0}\" file was not found." + Environment.NewLine, _zipPath);
+                    Thread.Sleep(5000);
+                    throw new Exception("The data.zip directory must be in the same location!!!");
+                }
+                ZipFile.ExtractToDirectory(_zipPath, path);
                 Console.WriteLine("The \"{0}.zip\" extracted", folderName);
             }
-            Console.WriteLine();
 
             string[] fileEntries = Directory.GetFiles(path + folderName);
             return fileEntries;

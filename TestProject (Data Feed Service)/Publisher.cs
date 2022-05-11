@@ -15,7 +15,7 @@ namespace ConsoleAppNetMQ
         IFileSystem _fileSystem;
         Dictionary<string, SortedDictionary<DateTime, List<MarketData>>> topics;
         int messageCount = 0, throughputCount = 0, throughput = 0;
-        int verticalTextShift = 3, subscibersCount = 3;
+        int verticalTextShift = 5, subscibersCount = 3;
 
         public Publisher(IDataParser dataParser, IFileSystem fileSystem)
         {
@@ -23,7 +23,12 @@ namespace ConsoleAppNetMQ
             _fileSystem = fileSystem;
 
             // TrimFilesLength() added to speed up test data processing during debugging
+#if DEBUG
             string[] fileEntries = fileSystem.GetFileEntries().TrimFilesLength();
+#else
+            string[] fileEntries = fileSystem.GetFileEntries();
+#endif
+            Console.Write("Reading files, please wait...");
 
             // Runs faster in parallel
             topics = fileEntries.AsParallel().Select(d => dataParser.ParseCsvData(dataParser.ReceiveCsvData(d).Result)).ToDictionary(k => k.Key, v => v.Value);

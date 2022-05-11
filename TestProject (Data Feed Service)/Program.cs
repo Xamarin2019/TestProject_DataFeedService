@@ -1,18 +1,49 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace ConsoleAppNetMQ
 {
     class Program
     {
+#if DEBUG
         static string zipPath = @"..\..\..\data.zip";
+#else
+        static string zipPath = Path.Combine(Directory.GetCurrentDirectory(), "data.zip");
+#endif
+
 
         static void Main(string[] args)
         {
             Console.WriteLine("Test Project: Data Feed Service");
+            Console.Write("Please select test case: ");
+            
+            switch (Console.ReadLine())
+            {
+                case "1":
+                    Console.SetCursorPosition(25, 1);
+                    Console.Write($"TestCase1");
+                    TestCase1();
+                    break;
+                case "2":
+                    Console.SetCursorPosition(25, 1);
+                    Console.WriteLine($"TestCase2");
+                    TestCase2();
+                    break;
+                case "3":
+                    Console.SetCursorPosition(25, 1);
+                    Console.WriteLine($"TestCase3");
+                    myTestCase();
+                    break;
+                // Return text for an incorrect option entry.
+                default:
+                    Console.SetCursorPosition(25, 1);
+                    Console.WriteLine($"incorrect option");
+                    break;
+            }
 
-            myTestCase();
+            
 
             Console.ReadKey();
 
