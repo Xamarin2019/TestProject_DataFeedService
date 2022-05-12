@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleAppNetMQ
 {
-    class DataParser : IDataParser
+    public class DataParser : IDataParser
     {
         Regex getFileName = new Regex(@"(\w*)(?=\.\w{3})");
 
@@ -41,7 +41,7 @@ namespace ConsoleAppNetMQ
             return ReadCsvFile(address);
         }
 
-        public KeyValuePair<string, SortedDictionary<DateTime, List<MarketData>>> ParseCsvData((string topic, string[] data) tuple)
+        public virtual KeyValuePair<string, SortedDictionary<DateTime, List<MarketData>>> ParseCsvData((string topic, string[] data) tuple)
         {
             Debug.WriteLine($"Begin ParseCsvData {tuple.data[1]}");
             var dict = new SortedDictionary<DateTime, List<MarketData>>();

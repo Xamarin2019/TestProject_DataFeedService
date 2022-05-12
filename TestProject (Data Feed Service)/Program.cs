@@ -5,14 +5,13 @@ using System.Threading.Tasks;
 
 namespace ConsoleAppNetMQ
 {
-    class Program
+    public class Program
     {
 #if DEBUG
-        static string zipPath = @"..\..\..\data.zip";
+        public static string zipPath = @"..\..\..\data.zip";
 #else
-        static string zipPath = Path.Combine(Directory.GetCurrentDirectory(), "data.zip");
+        public static string zipPath = Path.Combine(Directory.GetCurrentDirectory(), "data.zip");
 #endif
-
 
         static void Main(string[] args)
         {
